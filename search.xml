@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>前端面试常用算法记录</title>
+      <link href="/2020/06/27/%E5%89%8D%E7%AB%AF%E9%9D%A2%E8%AF%95%E5%B8%B8%E7%94%A8%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95/"/>
+      <url>/2020/06/27/%E5%89%8D%E7%AB%AF%E9%9D%A2%E8%AF%95%E5%B8%B8%E7%94%A8%E7%AE%97%E6%B3%95%E8%AE%B0%E5%BD%95/</url>
+      
+        <content type="html"><![CDATA[<p>原理懒得写，直接写代码</p><h2 id="快排"><a href="#快排" class="headerlink" title="快排"></a>快排</h2><p>其实js内部的sort()就是用的快排，但是面试的时候肯定不能直接arr.sort()啦~这里自己实现一个。</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> quickSort = <span class="function"><span class="keyword">function</span>(<span class="params">arr</span>) </span>&#123;</span><br><span class="line">　<span class="keyword">if</span> (arr.length &lt;= <span class="number">1</span>) <span class="keyword">return</span> arr;</span><br><span class="line">　<span class="keyword">const</span> pivotIndex = <span class="built_in">Math</span>.floor(arr.length / <span class="number">2</span>);</span><br><span class="line">　<span class="keyword">const</span> pivot = arr.splice(pivotIndex, <span class="number">1</span>)[<span class="number">0</span>];</span><br><span class="line">　<span class="keyword">const</span> left = [];</span><br><span class="line">  <span class="keyword">const</span> right = [];</span><br><span class="line">  arr.forEach(<span class="function"><span class="params">item</span> =&gt;</span> &#123;</span><br><span class="line">　  item &lt; pivot ? left.push(item) : right.push(item);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">　<span class="keyword">return</span> quickSort(left).concat([pivot], quickSort(right));</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> javascript </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 面试题 </tag>
+            
+            <tag> javascript </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>typescript新项目模板</title>
       <link href="/2020/01/20/typescript%E6%96%B0%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/"/>
       <url>/2020/01/20/typescript%E6%96%B0%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/</url>
