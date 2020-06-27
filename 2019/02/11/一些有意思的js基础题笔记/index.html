@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.henryye.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文章持面试题录一些令人印象深刻js的基础题和原理，其中许多细节蕴含着js的奇妙之处，接下来我来谈谈js一些有意思的地方。 console.log(NaN &#x3D;&#x3D; NaN) &#x2F;&#x2F; false console.log(typeofNaN) &#x2F;&#x2F; number console.log(isNaN(NaN)) &#x2F;&#x2F; true console.log(isNaN(&amp;apos;123&amp;apos;)) &#x2F;&#x2F; f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一些有意思的js基础题笔记">
+<meta property="og:url" content="https://blog.henryye.top/2019/02/11/%E4%B8%80%E4%BA%9B%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84js%E5%9F%BA%E7%A1%80%E9%A2%98%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="有梦想的咸鱼">
+<meta property="og:description" content="本文章持面试题录一些令人印象深刻js的基础题和原理，其中许多细节蕴含着js的奇妙之处，接下来我来谈谈js一些有意思的地方。 console.log(NaN &#x3D;&#x3D; NaN) &#x2F;&#x2F; false console.log(typeofNaN) &#x2F;&#x2F; number console.log(isNaN(NaN)) &#x2F;&#x2F; true console.log(isNaN(&amp;apos;123&amp;apos;)) &#x2F;&#x2F; f">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-02-11T04:15:20.000Z">
+<meta property="article:modified_time" content="2020-06-27T08:41:53.992Z">
+<meta property="article:author" content="HenryYe">
+<meta property="article:tag" content="面试题">
+<meta property="article:tag" content="javascript">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.henryye.top/2019/02/11/%E4%B8%80%E4%BA%9B%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84js%E5%9F%BA%E7%A1%80%E9%A2%98%E7%AC%94%E8%AE%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>一些有意思的js基础题笔记 | 有梦想的咸鱼</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">有梦想的咸鱼</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">HenryYe's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.henryye.top/2019/02/11/%E4%B8%80%E4%BA%9B%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84js%E5%9F%BA%E7%A1%80%E9%A2%98%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="HenryYe">
+      <meta itemprop="description" content="21届前端仔记录偷偷学习的点滴 技术blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="有梦想的咸鱼">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一些有意思的js基础题笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-02-11 12:15:20" itemprop="dateCreated datePublished" datetime="2019-02-11T12:15:20+08:00">2019-02-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-27 16:41:53" itemprop="dateModified" datetime="2020-06-27T16:41:53+08:00">2020-06-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/" itemprop="url" rel="index"><span itemprop="name">javascript</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文章持面试题录一些令人印象深刻js的基础题和原理，其中许多细节蕴含着js的奇妙之处，接下来我来谈谈js一些有意思的地方。</p>
+<pre><code>console.log(NaN == NaN) // false
+console.log(typeofNaN) // number
+console.log(isNaN(NaN)) // true
+console.log(isNaN(&apos;123&apos;)) // false
+console.log(isNaN(&apos;string&apos;) // true</code></pre><p>NaN(Not a Number)表示一个非数字值，但是他本身是一个number,任何数除以0都是NaN,要注意辨别NaN的方法，<br>isNaN会将接收到的参数转化为数字，如果可以转化为数字为false，如果不能转化为数字则为true</p>
+<h2 id="undefinded和null"><a href="#undefinded和null" class="headerlink" title="undefinded和null"></a>undefinded和null</h2><pre><code>console.log(undefined == null) // true
+console.log(undefined === null) // false
+console.log(typeofnull) // object
+console.log(typeofundefined) // undefined</code></pre><p>undefinded本质上是null的衍生类，说白了,undefinded就是未初始化，null就是不存在</p>
+<h2 id="object-Object"><a href="#object-Object" class="headerlink" title="[object Object]"></a>[object Object]</h2><p>大家在console.log的时候肯定见到过[object Object]这种输出，那么这是什么呢?<br>先说一下产生原因把</p>
+<pre><code>const res = {
+  name: &apos;Tony&apos;,
+  id: 123
+}
+console.log(`res${res}`) // res [object Object]
+// 相当于
+console.log(res.toString()) // res [object Object]</code></pre><p>形如这样的输出会造成这样的结果，其实类似于强制转化，因为前面已经有字符串了，再+一个变量就会输出这个变量的字符串形式，<br>也就是toString()，这个函数返回 “[object type]”，其中type是对象的类型，如果改成console.log(‘res’,res)就不会有问题</p>
+<p>还有一种方式是利用JSON.stringify(res)转化</p>
+<p>##利用方括号访问对象属性</p>
+<p>访问一个对象的属性，除了可以用.的方式，还可以用方括号来访问，使用方括号的方式有一个好处就是可以访问变量,可避免一些保留字。形如:</p>
+<pre><code>var obj = {
+&quot;name&quot;: &apos;henryye&apos;,
+    age: 20// 字段会自动打上双引号 &quot;age&quot;
+}
+
+var a = &quot;age&quot;
+console.log(obj[&quot;name&quot;]) // henryye
+console.log(obj[a]) // 20</code></pre><h2 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h2><p>稍微深入了解js的朋友们肯定知道浏览器的垃圾回收机制，而防止因为未销毁的全局变量造成的内存泄漏的方法就是在函数尾部将该变量设为null，<br>但是这种做法很憨而且很麻烦。一般情况下，码农们并没有刻意去设置null或者是规范的代码的防止了内存泄露，而性能的影响也不是那么大（除非老板追求极致的性能或者你是强迫症患者）。像react这种组件化框架可以说有效的防止了内存泄漏，除非你在该组件卸载时又创建了变量。所以，平时代码写规范点就ok啦~</p>
+<h2 id="事件队列"><a href="#事件队列" class="headerlink" title="事件队列"></a>事件队列</h2><pre><code>console.log(1)
+setTimeout(()=&gt;{
+console.log(8)
+}
+functionasync1() {
+console.log(2)
+}
+functionasync2() {
+await async1()
+console.log(3)
+}
+
+await async2()
+newPromise((resolve)=&gt;{
+console.log(4)
+    resolve()
+}).then(()=&gt;{
+console.log(6)
+    }).then(()=&gt;{
+console.log(7)
+    }
+  })
+
+console.log(5)</code></pre><p>输出顺序如代码所示，本质上是考对事件队列的宏任务和微任务的理解，推荐一篇<a href="https://juejin.im/post/5c3d8956e51d4511dc72c200/" target="_blank" rel="noopener">博文</a></p>
+<h2 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h2><pre><code>for (var i = 0; i &lt; 5; i++) {
+    setTimeout(function() {
+console.log(i);
+    }, 1000);
+}
+
+// 5 5 5 5 5</code></pre><p>因为 setTimeout 的 console.log(i); 的i是 var 定义的，所以是函数级的作用域，不属于 for 循环体，属于 global。等到 for 循环结束，i 已经等于 5 了，这个时候再执行 setTimeout 的五个回调函数，里面的 console.log(i); 的 i 去向上找作用域，只能找到 global下 的 i，即 5。所以输出都是 5。</p>
+<p>如果要输出12345，则需要改变函数的作用域</p>
+<p>一：</p>
+<pre><code>for (var i = 0; i &lt; 5; i++) { 
+    (function(i){      //立刻执行函数
+        setTimeout(function (){
+console.log(i);  
+         },1000);  
+    })(i);  
+}</code></pre><p>二:</p>
+<pre><code>for (let i = 0; i &lt; 5; i++) {     //let 代替 var
+    setTimeout(function (){
+console.log(i);  
+     },1000);  
+}</code></pre><h2 id="变量提升"><a href="#变量提升" class="headerlink" title="变量提升"></a>变量提升</h2><pre><code>console.log(typeof t)
+var t = &apos;123&apos;
+for(var i = 0; i &lt; 3; i++) {
+console.log(i)
+}
+console.log(i)
+
+// undefinded 0 1 2 3</code></pre><p>这个是很经典也很简单的问题了，var定义的变量会提升至最顶部，前两句等于</p>
+<pre><code>var t
+console.log(typeof t)
+t = &apos;123&apos;</code></pre><p>个人觉得这个设定很奇葩= =毕竟学过C和java这种强类型语言后看不惯这种随意的规则，幸好es6出的let和const完美替代var，把这段代码var换成let就会报错</p>
+<h2 id="判断一个变量的类型"><a href="#判断一个变量的类型" class="headerlink" title="判断一个变量的类型"></a>判断一个变量的类型</h2><p>我们熟悉的判断类型的语句为 typeof，但是typeof可取的值却时常记不住，这里我来再提一遍，typeof可返回undefined,null,object,function,string,number六种字符串。如果要判断一个数组是不是数组的话，需要用 instanceof。instanceof 运算符用于检测构造函数的 prototype 属性是否出现在某个实例对象的原型链上。</p>
+<h2 id="sort-方法"><a href="#sort-方法" class="headerlink" title="sort()方法"></a>sort()方法</h2><p>熟悉js的童鞋都知道sort()  方法用于对数组的元素进行排序(快排)，并返回数组，但是很少人钻研过它的细节，以至于大部分人都踩过坑。别急，首先来康康定义：默认排序顺序是根据字符串UniCode码。因为排序是按照字符串UniCode码的顺序进行排序的，所以首先应该把数组元素都转化成字符串（如有必要），以便进行比较。</p>
+<p>语法：arrayObject.sort(sortby);</p>
+<p>参数sortby  可选，用来规定排序的顺序，但必须是函数。</p>
+<pre><code>// 普通用法
+var arr = [&apos;henry&apos;,&apos;ye&apos;,&apos;tonyma&apos;]
+arr.sort() // [&quot;henry&quot;, &quot;tonyma&quot;, &quot;ye&quot;]
+
+// 踩坑了
+var arr = [123,321,1000]
+arr.sort() // [1000, 123, 321]</code></pre><p>这时候就要给sort()提供一个函数参数了，这个函数的规则如下：<br>比较函数应该具有两个参数 a 和 b，其返回值如下：</p>
+<p>若 a 小于 b，即 a - b 小于零，则返回一个小于零的值，数组将按照升序排列。</p>
+<p>若 a 等于 b，则返回 0。</p>
+<p>若 a 大于 b, 即 a - b 大于零，则返回一个大于零的值，数组将按照降序排列。<br>形如</p>
+<pre><code>var arr = [123,321,1000]
+arr.sort((a,b)=&gt; {
+return a-b;
+}) // [123, 321, 1000]</code></pre><p>这个函数还可以通过ifelse返回不同的值形成更复杂的形式呢，万变不离其宗，记住a和b的关系和返回值与升降序的关联就好啦</p>
+<h2 id="持续更新"><a href="#持续更新" class="headerlink" title="持续更新"></a>持续更新</h2>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="tag"># 面试题</a>
+              <a href="/tags/javascript/" rel="tag"># javascript</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/01/27/hello-world/" rel="prev" title="Hello,world！">
+      <i class="fa fa-chevron-left"></i> Hello,world！
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/04/11/%E6%B5%85%E8%B0%88react%E4%B8%ADsetState%E7%9A%84%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E6%9C%BA%E5%88%B6/" rel="next" title="浅谈react中setState的同步和异步机制">
+      浅谈react中setState的同步和异步机制 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefinded和null"><span class="nav-number">1.</span> <span class="nav-text">undefinded和null</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#object-Object"><span class="nav-number">2.</span> <span class="nav-text">[object Object]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存泄漏"><span class="nav-number">3.</span> <span class="nav-text">内存泄漏</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事件队列"><span class="nav-number">4.</span> <span class="nav-text">事件队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#作用域"><span class="nav-number">5.</span> <span class="nav-text">作用域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变量提升"><span class="nav-number">6.</span> <span class="nav-text">变量提升</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#判断一个变量的类型"><span class="nav-number">7.</span> <span class="nav-text">判断一个变量的类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sort-方法"><span class="nav-number">8.</span> <span class="nav-text">sort()方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#持续更新"><span class="nav-number">9.</span> <span class="nav-text">持续更新</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">HenryYe</p>
+  <div class="site-description" itemprop="description">21届前端仔记录偷偷学习的点滴 技术blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/HenryYey" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;HenryYey" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:103596420@qq.com" title="E-Mail → mailto:103596420@qq.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HenryYe</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

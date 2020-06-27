@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.henryye.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言作为一名不务正业的前端开发者，平时项目里后端使用的都是NodeJs的框架Koa, 虽说每次搭后端时都会copy以前的项目，但是难免会重复造轮子。其实一般的后端MVC架构比较固定, 对于一个小项目，或者前端仔想自己用node搭个后台，就没有必要每次都从0开始了。所以设想有这么一个工具，可以帮助开发者快速搭建node后台，仅需专注于写db的Model和增删改查即可。 这里我总结出了一套Koa模板（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[koa-template]从0开始搭建koa项目模板">
+<meta property="og:url" content="https://blog.henryye.top/2019/08/25/koa-template-%E4%BB%8E0%E5%BC%80%E5%A7%8B%E6%90%AD%E5%BB%BAkoa%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/index.html">
+<meta property="og:site_name" content="有梦想的咸鱼">
+<meta property="og:description" content="前言作为一名不务正业的前端开发者，平时项目里后端使用的都是NodeJs的框架Koa, 虽说每次搭后端时都会copy以前的项目，但是难免会重复造轮子。其实一般的后端MVC架构比较固定, 对于一个小项目，或者前端仔想自己用node搭个后台，就没有必要每次都从0开始了。所以设想有这么一个工具，可以帮助开发者快速搭建node后台，仅需专注于写db的Model和增删改查即可。 这里我总结出了一套Koa模板（">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-08-25T09:54:50.000Z">
+<meta property="article:modified_time" content="2020-06-27T09:56:49.926Z">
+<meta property="article:author" content="HenryYe">
+<meta property="article:tag" content="henryye">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.henryye.top/2019/08/25/koa-template-%E4%BB%8E0%E5%BC%80%E5%A7%8B%E6%90%AD%E5%BB%BAkoa%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>[koa-template]从0开始搭建koa项目模板 | 有梦想的咸鱼</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">有梦想的咸鱼</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">HenryYe's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.henryye.top/2019/08/25/koa-template-%E4%BB%8E0%E5%BC%80%E5%A7%8B%E6%90%AD%E5%BB%BAkoa%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="HenryYe">
+      <meta itemprop="description" content="21届前端仔记录偷偷学习的点滴 技术blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="有梦想的咸鱼">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [koa-template]从0开始搭建koa项目模板
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-08-25 17:54:50" itemprop="dateCreated datePublished" datetime="2019-08-25T17:54:50+08:00">2019-08-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-27 17:56:49" itemprop="dateModified" datetime="2020-06-27T17:56:49+08:00">2020-06-27</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>作为一名不务正业的前端开发者，平时项目里后端使用的都是NodeJs的框架Koa, 虽说每次搭后端时都会copy以前的项目，但是难免会重复造轮子。其实一般的后端MVC架构比较固定, 对于一个小项目，或者前端仔想自己用node搭个后台，就没有必要每次都从0开始了。所以设想有这么一个工具，可以帮助开发者快速搭建node后台，仅需专注于写db的Model和增删改查即可。</p>
+<p>这里我总结出了一套Koa模板（2019 v1.0 koa:2.7.0）</p>
+<p>可见github: <a href="https://github.com/HenryYey/Koa-template" target="_blank" rel="noopener">https://github.com/HenryYey/Koa-template</a><br>接下来我会讲一下思路和点一下要注意的点，涉及的知识点较多，请各位自行学习。</p>
+<h2 id="技术栈"><a href="#技术栈" class="headerlink" title="技术栈"></a>技术栈</h2><p>服务层</p>
+<ul>
+<li>Koa</li>
+<li>Sequelize</li>
+<li>mysql</li>
+</ul>
+<p>安全</p>
+<ul>
+<li>jwt</li>
+</ul>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>这是一个经典的MVC结构,接下来我会选择性的介绍一下每个文件夹的用途。</p>
+<pre><code>├─ bin
+| └─  www     
+├─ controllers
+| ├─  login.js
+| ├─  index.js
+| └─  crud.js
+├─ middlewares
+| ├─  response.js
+| ├─  jwt.js
+| └─  cache.js
+├─ models
+| ├─  user.js
+| └─  db.js
+├─ routes
+| ├─  public.js
+| └─  private.js
+├─ test
+| └─  index.spec.js
+├─  README.md
+├─  package.json
+├─  package-lock.json
+├─  config.js
+├─  app.js
+└─  .eslintrc.js</code></pre><h2 id="bin"><a href="#bin" class="headerlink" title="bin"></a>bin</h2><p>这是用来放置一些配置的，这里放了一个www，也就是后端的启动入口。通读一遍知道它在干嘛就好了。简单来说就是先校验一下，然后开启服务监听端口</p>
+<p>因为他是一个可执行文件，不管对windows还是Linux来说，他都可以直接运行，本地开发时可用npm start, 在服务器上时使用npm run prd，也就是用pm2来守护进程</p>
+<h2 id="controllers"><a href="#controllers" class="headerlink" title="controllers"></a>controllers</h2><p>这里属于后端架构中的逻辑层，用于操作数据库和一些业务逻辑，并且提供一个给前端的接口。一些较大的项目会分两块，及controller和service，但是这里假定的场景都包在controller就够了。</p>
+<p>这里建议除了index，一个功能为一个文件去设计好相应的接口。</p>
+<h3 id="controllers-crud-js"><a href="#controllers-crud-js" class="headerlink" title="controllers/crud.js"></a>controllers/crud.js</h3><p>crud增删改查，我已经写好一些模板语句，开发者根据实际需求修改。形如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 模板语句，按实际需求修改</span><br><span class="line"> *&#x2F;</span><br><span class="line">import User from &#39;..&#x2F;models&#x2F;user&#39;;</span><br><span class="line"></span><br><span class="line">const crud &#x3D; &#123;&#125;;</span><br><span class="line"></span><br><span class="line">crud.search &#x3D; async (ctx, next) &#x3D;&gt; &#123;</span><br><span class="line">  try &#123;</span><br><span class="line">    const &#123;</span><br><span class="line">      userName</span><br><span class="line">    &#125; &#x3D; ctx.request.body;</span><br><span class="line">    &#x2F;&#x2F; 先从缓存拿，拿不到再去查表</span><br><span class="line">    const res &#x3D; ctx.cache.getVal(userName);</span><br><span class="line">    if (res) &#123;</span><br><span class="line">      ctx.result &#x3D; res;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      ctx.result &#x3D; await User.findOne(&#123;</span><br><span class="line">        where: &#123;</span><br><span class="line">          userName</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      ctx.cache.setVal(&#123;</span><br><span class="line">        key: &#96;user_$&#123;userName&#125;&#96;, &#x2F;&#x2F; 推荐使用md5加密作为key</span><br><span class="line">        value: res</span><br><span class="line">      &#125;);</span><br><span class="line">      </span><br><span class="line">      ctx.log.info(&#96;set cache $&#123;userName&#125;&#96;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; catch (err) &#123;</span><br><span class="line">    ctx.log.error(JSON.stringify(err));</span><br><span class="line">    throw new Error(JSON.stringify(err));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return next();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<p>里面涉及到的model及log,cache等我会在后面讲解，而像中间件、ctx这种不懂的请读者自行学习。</p>
+<h3 id="controllers-index-js"><a href="#controllers-index-js" class="headerlink" title="controllers/index.js"></a>controllers/index.js</h3><p>这个文件会自动导入所有controller子文件并统一封装为一个controllers对象暴露出去，这样，接口路由就可以直接导入这个对象，不用每次修改一个文件要改两个地方。</p>
+<h2 id="routes"><a href="#routes" class="headerlink" title="routes"></a>routes</h2><p>接口路由，用于分发前端请求到相应的接口处理。这里我分为了public和private两个文件，前者不需要鉴权，像登陆注册、首页展示这些不需要考虑数据库安全的操作，后者在分发请求前需要经过jwt校验，无权限时会抛出异常丢给前端解决（重定向到登录或者报错）。</p>
+<p>路由形如  </p>
+<pre><code>router.get(&apos;/crud&apos;, controllers.crud.search);
+router.post(&apos;/crud&apos;, controllers.crud.add);</code></pre><p>其中controllers是上面讲到的统一对象，crud是文件名，然后是方法。</p>
+<h2 id="models"><a href="#models" class="headerlink" title="models"></a>models</h2><p>models是用来存sequelize的数据库实例对象</p>
+<h2 id="middlewares"><a href="#middlewares" class="headerlink" title="middlewares"></a>middlewares</h2><p>中间件是KOA的一大特点，这个文件夹用来封装一些自定义的中间件，例如这里我封装好的请求/响应中间件。还有很多通用的中间件可以用npm包，这些模块都在app.js中使用，并且遵循一定的顺序，具体的细节大家可以看代码</p>
+<h3 id="logger"><a href="#logger" class="headerlink" title="logger"></a>logger</h3><p>logger依赖于我自己封的一个npm包，可方便的打印出日志</p>
+<h3 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h3><p>这里使用了一个自己编写的本地内存缓存，可以在本地内存中缓存少量数据。文档见<a href="https://github.com/HenryYey/node-cache-obj" target="_blank" rel="noopener">https://github.com/HenryYey/node-cache-obj</a></p>
+<h3 id="单测"><a href="#单测" class="headerlink" title="单测"></a>单测</h3><p>test文件夹。单测可用与接口、函数逻辑的测试，具体单测自行编写</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本模板已经将许多通用的模块、结构、环境给搭好了，并且给出了一些demo，为开发省下了不少时间，具体内容根据需求修改</p>
+<p>附上github：<br><a href="https://github.com/HenryYey/Koa-template" target="_blank" rel="noopener">https://github.com/HenryYey/Koa-template</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/05/18/js%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/" rel="prev" title="js高级用法踩坑记录">
+      <i class="fa fa-chevron-left"></i> js高级用法踩坑记录
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/20/typescript%E6%96%B0%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/" rel="next" title="typescript新项目模板">
+      typescript新项目模板 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#技术栈"><span class="nav-number">2.</span> <span class="nav-text">技术栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目录结构"><span class="nav-number">3.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bin"><span class="nav-number">4.</span> <span class="nav-text">bin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#controllers"><span class="nav-number">5.</span> <span class="nav-text">controllers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#controllers-crud-js"><span class="nav-number">5.1.</span> <span class="nav-text">controllers&#x2F;crud.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#controllers-index-js"><span class="nav-number">5.2.</span> <span class="nav-text">controllers&#x2F;index.js</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#routes"><span class="nav-number">6.</span> <span class="nav-text">routes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#models"><span class="nav-number">7.</span> <span class="nav-text">models</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#middlewares"><span class="nav-number">8.</span> <span class="nav-text">middlewares</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#logger"><span class="nav-number">8.1.</span> <span class="nav-text">logger</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cache"><span class="nav-number">8.2.</span> <span class="nav-text">cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单测"><span class="nav-number">8.3.</span> <span class="nav-text">单测</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">HenryYe</p>
+  <div class="site-description" itemprop="description">21届前端仔记录偷偷学习的点滴 技术blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/HenryYey" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;HenryYey" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:103596420@qq.com" title="E-Mail → mailto:103596420@qq.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HenryYe</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

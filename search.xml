@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>typescript新项目模板</title>
+      <link href="/2020/01/20/typescript%E6%96%B0%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/"/>
+      <url>/2020/01/20/typescript%E6%96%B0%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/</url>
+      
+        <content type="html"><![CDATA[<p>typescript不像js，即插即用。在使用ts的项目，需要配置一下才可以使用。曾经的我每次开一个项目都要各种搜索然后ctrl cv，然后每次都会遇到一些奇奇怪怪的问题。所以索性没什么必要就用js够了。</p><p>但是用久了ts，越用越爽。所以这里整理一份新项目模板，免得以后每次都要到处复制。</p><p>包括基本配置、构建流程、规范。</p><h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>搭建一个ts项目的前戏： 建立git仓库 -&gt; 初始化npm -&gt; 安装依赖 -&gt; 配置tsconfig.json -&gt; 配置package.json -&gt; 配置lint（可选）-&gt; 编码 -&gt; 发布</p><p>如果是前端项目的化还需要配一下webpack。有时间这个也自己撸一个</p><h2 id="tsconfig-json"><a href="#tsconfig-json" class="headerlink" title="tsconfig.json"></a>tsconfig.json</h2><p>这个文件十分关键，一般配置问题都是这里出现的，以下是我梳理的比较通用的。详见官网</p><pre><code>{ &quot;compilerOptions&quot;:{     &quot;allowSyntheticDefaultImports&quot;:true, // 允许从没有默认导出的模块进行默认导入     &quot;skipDefaultLibCheck&quot;: false, //不跳过库文件的声明文件类型检查     &quot;allowUnreachableCode&quot;: true, // 不报告执行不到的代码错误。     &quot;allowUnusedLabels&quot;: false,    // 不报告未使用的标签错误     &quot;alwaysStrict&quot;: false, // 以严格模式解析并为每个源文件生成 &quot;use strict&quot;语句     &quot;baseUrl&quot;: &quot;.&quot;, // 工作根目录     &quot;experimentalDecorators&quot;: true, // 启用实验性的ES装饰器     &quot;sourceMap&quot;: true, // 是否生成map文件     &quot;module&quot;: &quot;commonjs&quot;, // 指定生成哪个模块系统代码     &quot;noImplicitAny&quot;: false, // 是否默认禁用 any     &quot;removeComments&quot;: true, // 是否移除注释     &quot;types&quot;: [ //指定引入的类型声明文件，默认是自动引入所有声明文件，一旦指定该选项，则会禁用自动引入，改为只引入指定的类型声明文件，如果指定空数组[]则不引用任何文件       &quot;node&quot;, // 引入 node 的类型声明 &quot;mocha&quot;     ],     &quot;paths&quot;:{ // 指定模块的路径，和baseUrl有关联，和webpack中resolve.alias配置一样       &quot;@/*&quot;: [&quot;src/*&quot;]     },     &quot;target&quot;: &quot;ES2018&quot;, // 编译的目标是什么版本的     &quot;outDir&quot;: &quot;./dist&quot;, // 输出目录     &quot;declaration&quot;: true, // 是否自动创建类型声明文件     &quot;declarationDir&quot;: &quot;./dist&quot;, // 类型声明文件的输出目录     &quot;allowJs&quot;: true, // 允许编译javascript文件。     &quot;lib&quot;: [ // 编译过程中需要引入的库文件的列表       &quot;es5&quot;,       &quot;es2015&quot;,       &quot;es2016&quot;,       &quot;es2017&quot;,       &quot;es2018&quot;, &quot;dom&quot;     ]   },   // 指定一个匹配列表（属于自动指定该路径下的所有ts相关文件）   &quot;include&quot;: [ &quot;lib/**/*&quot;   ],   &quot;exclude&quot;: [&quot;node_modules&quot;, &quot;dist&quot;] }</code></pre><h2 id="lint"><a href="#lint" class="headerlink" title="lint"></a>lint</h2><p>我习惯使用eslint，所以这里梳理一下我通用的eslint<br>.eslintrc.js</p><pre><code>module.exports ={&quot;env&quot;:{&quot;browser&quot;: true,&quot;es6&quot;: true    },&quot;extends&quot;: [&quot;eslint:recommended&quot;,&quot;plugin:@typescript-eslint/eslint-recommended&quot;    ],&quot;globals&quot;:{&quot;Atomics&quot;: &quot;readonly&quot;,&quot;SharedArrayBuffer&quot;: &quot;readonly&quot;    },&quot;parser&quot;: &quot;@typescript-eslint/parser&quot;,&quot;parserOptions&quot;:{&quot;ecmaVersion&quot;: 2018,&quot;sourceType&quot;: &quot;module&quot;    },&quot;plugins&quot;: [&quot;@typescript-eslint&quot;    ],&quot;rules&quot;:{&quot;no-unused-vars&quot;: 1    }};</code></pre><h2 id="配置package-json"><a href="#配置package-json" class="headerlink" title="配置package.json"></a>配置package.json</h2><p>重点就是这几行，注意入口文件要写对。</p><pre><code>&quot;main&quot;: &quot;dist/index.js&quot;,&quot;types&quot;: &quot;dist/index.d.ts&quot;,&quot;scripts&quot;:{  &quot;test&quot;: &quot;cross-env NODE_ENV=test mocha -r espower-typescript/guess test/*.spec.ts&quot;,  &quot;lint&quot;: &quot;eslint \&quot;lib/index.ts\&quot; \&quot;test/**/*\&quot;&quot;,  &quot;build&quot;: &quot;npm run lint &amp;&amp; npm run build:lib&quot;,  &quot;build:lib&quot;: &quot;tsc&quot;,  &quot;release&quot;: &quot;tsc &amp;&amp; npm publish&quot;},</code></pre><h2 id="模块规范化"><a href="#模块规范化" class="headerlink" title="模块规范化"></a>模块规范化</h2><p>这里只讲CommonJs和ESMoudle。</p><p>CommonJS模块是对象，是运行时加载，运行时才把模块挂载在exports之上（加载整个模块的所有），加载模块其实就是查找对象属性。<br>ES Module不是对象，是使用export显示指定输出，再通过import输入。此法为编译时加载，编译时遇到import就会生成一个只读引用。等到运行时就会根据此引用去被加载的模块取值。所以不会加载模块所有方法，仅取所需。</p><p>简单来说，CommonJs是</p><pre><code>module.exports ={ sth }exports.sthconst{ sth } = require(&apos;sth&apos;)</code></pre><p>而 ESModule是</p><pre><code>exportconst aimport{ a } from&apos;path&apos;exportdefault aexport * as a from&apos;path&apos;</code></pre><p>CommonJS和ES Module是可以写一起的，但是最好不要。毕竟一个是编译阶段一个是运行阶段。免得遇到一些坑。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> typescript </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 模板 </tag>
+            
+            <tag> typescript </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>[koa-template]从0开始搭建koa项目模板</title>
+      <link href="/2019/08/25/koa-template-%E4%BB%8E0%E5%BC%80%E5%A7%8B%E6%90%AD%E5%BB%BAkoa%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/"/>
+      <url>/2019/08/25/koa-template-%E4%BB%8E0%E5%BC%80%E5%A7%8B%E6%90%AD%E5%BB%BAkoa%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/</url>
+      
+        <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>作为一名不务正业的前端开发者，平时项目里后端使用的都是NodeJs的框架Koa, 虽说每次搭后端时都会copy以前的项目，但是难免会重复造轮子。其实一般的后端MVC架构比较固定, 对于一个小项目，或者前端仔想自己用node搭个后台，就没有必要每次都从0开始了。所以设想有这么一个工具，可以帮助开发者快速搭建node后台，仅需专注于写db的Model和增删改查即可。</p><p>这里我总结出了一套Koa模板（2019 v1.0 koa:2.7.0）</p><p>可见github: <a href="https://github.com/HenryYey/Koa-template" target="_blank" rel="noopener">https://github.com/HenryYey/Koa-template</a><br>接下来我会讲一下思路和点一下要注意的点，涉及的知识点较多，请各位自行学习。</p><h2 id="技术栈"><a href="#技术栈" class="headerlink" title="技术栈"></a>技术栈</h2><p>服务层</p><ul><li>Koa</li><li>Sequelize</li><li>mysql</li></ul><p>安全</p><ul><li>jwt</li></ul><h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>这是一个经典的MVC结构,接下来我会选择性的介绍一下每个文件夹的用途。</p><pre><code>├─ bin| └─  www     ├─ controllers| ├─  login.js| ├─  index.js| └─  crud.js├─ middlewares| ├─  response.js| ├─  jwt.js| └─  cache.js├─ models| ├─  user.js| └─  db.js├─ routes| ├─  public.js| └─  private.js├─ test| └─  index.spec.js├─  README.md├─  package.json├─  package-lock.json├─  config.js├─  app.js└─  .eslintrc.js</code></pre><h2 id="bin"><a href="#bin" class="headerlink" title="bin"></a>bin</h2><p>这是用来放置一些配置的，这里放了一个www，也就是后端的启动入口。通读一遍知道它在干嘛就好了。简单来说就是先校验一下，然后开启服务监听端口</p><p>因为他是一个可执行文件，不管对windows还是Linux来说，他都可以直接运行，本地开发时可用npm start, 在服务器上时使用npm run prd，也就是用pm2来守护进程</p><h2 id="controllers"><a href="#controllers" class="headerlink" title="controllers"></a>controllers</h2><p>这里属于后端架构中的逻辑层，用于操作数据库和一些业务逻辑，并且提供一个给前端的接口。一些较大的项目会分两块，及controller和service，但是这里假定的场景都包在controller就够了。</p><p>这里建议除了index，一个功能为一个文件去设计好相应的接口。</p><h3 id="controllers-crud-js"><a href="#controllers-crud-js" class="headerlink" title="controllers/crud.js"></a>controllers/crud.js</h3><p>crud增删改查，我已经写好一些模板语句，开发者根据实际需求修改。形如</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 模板语句，按实际需求修改</span><br><span class="line"> *&#x2F;</span><br><span class="line">import User from &#39;..&#x2F;models&#x2F;user&#39;;</span><br><span class="line"></span><br><span class="line">const crud &#x3D; &#123;&#125;;</span><br><span class="line"></span><br><span class="line">crud.search &#x3D; async (ctx, next) &#x3D;&gt; &#123;</span><br><span class="line">  try &#123;</span><br><span class="line">    const &#123;</span><br><span class="line">      userName</span><br><span class="line">    &#125; &#x3D; ctx.request.body;</span><br><span class="line">    &#x2F;&#x2F; 先从缓存拿，拿不到再去查表</span><br><span class="line">    const res &#x3D; ctx.cache.getVal(userName);</span><br><span class="line">    if (res) &#123;</span><br><span class="line">      ctx.result &#x3D; res;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      ctx.result &#x3D; await User.findOne(&#123;</span><br><span class="line">        where: &#123;</span><br><span class="line">          userName</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      ctx.cache.setVal(&#123;</span><br><span class="line">        key: &#96;user_$&#123;userName&#125;&#96;, &#x2F;&#x2F; 推荐使用md5加密作为key</span><br><span class="line">        value: res</span><br><span class="line">      &#125;);</span><br><span class="line">      </span><br><span class="line">      ctx.log.info(&#96;set cache $&#123;userName&#125;&#96;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; catch (err) &#123;</span><br><span class="line">    ctx.log.error(JSON.stringify(err));</span><br><span class="line">    throw new Error(JSON.stringify(err));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return next();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><p>里面涉及到的model及log,cache等我会在后面讲解，而像中间件、ctx这种不懂的请读者自行学习。</p><h3 id="controllers-index-js"><a href="#controllers-index-js" class="headerlink" title="controllers/index.js"></a>controllers/index.js</h3><p>这个文件会自动导入所有controller子文件并统一封装为一个controllers对象暴露出去，这样，接口路由就可以直接导入这个对象，不用每次修改一个文件要改两个地方。</p><h2 id="routes"><a href="#routes" class="headerlink" title="routes"></a>routes</h2><p>接口路由，用于分发前端请求到相应的接口处理。这里我分为了public和private两个文件，前者不需要鉴权，像登陆注册、首页展示这些不需要考虑数据库安全的操作，后者在分发请求前需要经过jwt校验，无权限时会抛出异常丢给前端解决（重定向到登录或者报错）。</p><p>路由形如  </p><pre><code>router.get(&apos;/crud&apos;, controllers.crud.search);router.post(&apos;/crud&apos;, controllers.crud.add);</code></pre><p>其中controllers是上面讲到的统一对象，crud是文件名，然后是方法。</p><h2 id="models"><a href="#models" class="headerlink" title="models"></a>models</h2><p>models是用来存sequelize的数据库实例对象</p><h2 id="middlewares"><a href="#middlewares" class="headerlink" title="middlewares"></a>middlewares</h2><p>中间件是KOA的一大特点，这个文件夹用来封装一些自定义的中间件，例如这里我封装好的请求/响应中间件。还有很多通用的中间件可以用npm包，这些模块都在app.js中使用，并且遵循一定的顺序，具体的细节大家可以看代码</p><h3 id="logger"><a href="#logger" class="headerlink" title="logger"></a>logger</h3><p>logger依赖于我自己封的一个npm包，可方便的打印出日志</p><h3 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h3><p>这里使用了一个自己编写的本地内存缓存，可以在本地内存中缓存少量数据。文档见<a href="https://github.com/HenryYey/node-cache-obj" target="_blank" rel="noopener">https://github.com/HenryYey/node-cache-obj</a></p><h3 id="单测"><a href="#单测" class="headerlink" title="单测"></a>单测</h3><p>test文件夹。单测可用与接口、函数逻辑的测试，具体单测自行编写</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本模板已经将许多通用的模块、结构、环境给搭好了，并且给出了一些demo，为开发省下了不少时间，具体内容根据需求修改</p><p>附上github：<br><a href="https://github.com/HenryYey/Koa-template" target="_blank" rel="noopener">https://github.com/HenryYey/Koa-template</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>js高级用法踩坑记录</title>
+      <link href="/2019/05/18/js%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/"/>
+      <url>/2019/05/18/js%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/</url>
+      
+        <content type="html"><![CDATA[<p>本水文持续收集我在工作和学习中遇到的值得记录的笔记，讲解一些需要时间去理解、去记忆的js高级用法，加深自己的记忆</p><h2 id="异步转同步函数"><a href="#异步转同步函数" class="headerlink" title="异步转同步函数"></a>异步转同步函数</h2><p>这里最经典的一个场景就是 后端还没获得操作数据库的结果就返回一个空值给前端了，很多同学刚学前后端交互时，包括我，都会头疼好久。那么，这里我介绍两种方法。</p><h3 id="async-amp-await"><a href="#async-amp-await" class="headerlink" title="async &amp; await"></a>async &amp; await</h3><p>详解见<a href="http://es6.ruanyifeng.com/#docs/async" target="_blank" rel="noopener">这里</a></p><p>我通俗易懂的讲下，有些组件框架封装好的高级函数或api，例如Sequelize，会“标识”一些异步函数，在调用时在前面加一个 await，就可以将这行变成一个同步过程，在含await的函数外层加一个async就可以了。</p><pre><code>const Func = asyncfunction(userName, password) {const result = await db.findAll({    where: {      userName,      password    }  });return result;}</code></pre><p>理解和用法都很简单，也是常用的，但是不是每个函数都可以用，一些比较原始的例如node的mysql模块，它对数据库的操作就不能被await作用，所以这时候我们就要用下面这个通用方法了。</p><h3 id="Promise"><a href="#Promise" class="headerlink" title="Promise"></a>Promise</h3><p><a href="http://es6.ruanyifeng.com/#docs/promise" target="_blank" rel="noopener">Promise</a>理解起来比较困难，但其实基本用法很简单，以下就是一个通用的函数模板</p><pre><code>const Func = asyncfunction() =&gt; {returnnewPromise((resolve, reject) =&gt; {const SQL = &quot;SELECT * FROM table&quot;;    connection.query(SQL, function (err, result) {if (err) {        reject(newError(&apos;[ERROR] - &apos; + err.message));      }      resolve(result);    });  }).then(result =&gt; {return result;  }).catch(err =&gt; {throw err;  })</code></pre><p>大致就是在函数外层封装一个Promise，当异步操作结束后就可以通过then()和catch()拿到结果了。需要深入理解一下。所有async await解决不了的就用Promise吧~</p><h2 id="JSON与String互转"><a href="#JSON与String互转" class="headerlink" title="JSON与String互转"></a>JSON与String互转</h2><p>Json -&gt; string: JSON.stringify(json);</p><p>string -&gt; Json: JSON.parse(string);</p><p>这里主要想提醒大家的是，如果拿到一个JSON转为字符串，再转回来发现失败了，大概率是因为这个值本身包含了 双引号”或者一些奇奇怪怪的转义符，具体原因大家可以研究一下，我提供几个解决方法:<br>1、利用eval()函数，它可计算某个字符串，并执行其中的js代码</p><pre><code>JSON.parse(eval(string));</code></pre><p>2、研究其规律，手动删除</p><pre><code>content = content.replace(/[\\]/g,&apos;&apos;); // 删除反斜杠content = content.substring(1,content.length - 1); // 删除第一个和最后一个字符</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> javascript </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 面试题 </tag>
+            
+            <tag> javascript </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>浅谈react中setState的同步和异步机制</title>
+      <link href="/2019/04/11/%E6%B5%85%E8%B0%88react%E4%B8%ADsetState%E7%9A%84%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E6%9C%BA%E5%88%B6/"/>
+      <url>/2019/04/11/%E6%B5%85%E8%B0%88react%E4%B8%ADsetState%E7%9A%84%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E6%9C%BA%E5%88%B6/</url>
+      
+        <content type="html"><![CDATA[<h2 id="场景引入"><a href="#场景引入" class="headerlink" title="场景引入"></a>场景引入</h2><p>相信大家在使用React的时候都会遇到关于setState()的问题，例如以下场景:<br><img src="https://img-blog.csdnimg.cn/20190819102414944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzM2MzI1NQ==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>本意是改变输入框时，对应替换state.text。但是如果在setState() 后打印一下就会发现，state的改变总是‘慢一拍’<br><img src="https://img-blog.csdnimg.cn/20190819102905448.png" alt="在这里插入图片描述"><br>比如你输入123时，控制台会先后打印 ‘ ‘ ,’1’, ‘12’ 。 经过思考和翻看文档，不难发现，这是因为setState()是异步的。如果换一种场景，在输入123后点击按钮，获取输入框的内容:<br><img src="https://img-blog.csdnimg.cn/20190819110148214.png" alt="在这里插入图片描述"><br>打印出来的是’123’而不是’12’。这也证明了state的改变只是’慢一拍’而不是’少一拍’。那么React为什么要引用这个异步机制呢？</p><h2 id="原理原理"><a href="#原理原理" class="headerlink" title="#原理原理"></a><a href="#原理">#原理</a>原理</h2><p><img src="https://img-blog.csdnimg.cn/20190819110743827.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzM2MzI1NQ==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>原理可以用这张图来描述，即在react中，setState通过一个队列机制实现state的更新。当执行setState时，会把需要更新的state合并后放入状态队列，而不会立刻更新this.state，当进入组件可更新状态时，这个队列机制就会<strong>高效的批量的更新state</strong>。</p><h3 id="保证内部的一致性"><a href="#保证内部的一致性" class="headerlink" title="保证内部的一致性"></a>保证内部的一致性</h3><p>目前 React 提供的 objects 有三种：① state ② props ③ refs<br>这三个 object 的行为和表现都是一致的，它们能够保证构建出协调的树。举个栗子，假设state是同步更新的，子组件的state更新了，但是父组件又需要该state，就会进行状态提升。而props并不会立即更新，因为组件并没有重新渲染。那么state、props更新一次，组件就会重新渲染一次。这样会显著的降低性能。所以在React中，props和state的更新都是异步的。</p><p>###提升性能</p><p>这就是关于上面提到的性能问题。再举几个例子:<br>当你和别人聊天时，你正在打字，对方突然发了很多条消息过来，如果state同步更新的话，对话框组件就会一直重新渲染，此时你的输入框就会卡一下。如果state是异步的话，react会进行批量更新，’偷偷’渲染好组件，虽然会有一丢丢延迟，但是体验感就好多了。<br>再例如，一个网站的设计是切换页面时弹出loading。如果你的网速很快，很快就能获取另一个页面，如果state是同步更新的，那么loading还是会被渲染，在你的屏幕里一闪而过再切换到页面。那么异步的时候，react会先渲染好页面，如果渲染地很快，那么加载动画不会弹出。此时就能做到无缝切换了。对于计算机而言，这样提升了性能，对于用户而言，提升了体验感。</p><h2 id="如何进行同步更新"><a href="#如何进行同步更新" class="headerlink" title="如何进行同步更新"></a>如何进行同步更新</h2><p>面试常问的一个点: 如何让setState()同步更新？<br>根据<a href="https://reactjs.org/docs/react-component.html#setstate" target="_blank" rel="noopener">官方文档</a>， 在setState()里给予其一个回调函数，在状态更新完毕后进行调用，这个过程就是同步的。下面我来测试一下:<br><img src="https://img-blog.csdnimg.cn/20190819114131719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzM2MzI1NQ==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20190819114118669.png" alt="在这里插入图片描述"><br>结果与预期一样。但是官方也说了，状态更新后的操作建议在componentDidMount中调用。所以，一般情况下还是按通常使用的异步更新。</p><p>以上就是我个人对react中setState()的异步和同步问题的分析。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> react </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> react </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>一些有意思的js基础题笔记</title>
+      <link href="/2019/02/11/%E4%B8%80%E4%BA%9B%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84js%E5%9F%BA%E7%A1%80%E9%A2%98%E7%AC%94%E8%AE%B0/"/>
+      <url>/2019/02/11/%E4%B8%80%E4%BA%9B%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84js%E5%9F%BA%E7%A1%80%E9%A2%98%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<p>本文章持面试题录一些令人印象深刻js的基础题和原理，其中许多细节蕴含着js的奇妙之处，接下来我来谈谈js一些有意思的地方。</p><pre><code>console.log(NaN == NaN) // falseconsole.log(typeofNaN) // numberconsole.log(isNaN(NaN)) // trueconsole.log(isNaN(&apos;123&apos;)) // falseconsole.log(isNaN(&apos;string&apos;) // true</code></pre><p>NaN(Not a Number)表示一个非数字值，但是他本身是一个number,任何数除以0都是NaN,要注意辨别NaN的方法，<br>isNaN会将接收到的参数转化为数字，如果可以转化为数字为false，如果不能转化为数字则为true</p><h2 id="undefinded和null"><a href="#undefinded和null" class="headerlink" title="undefinded和null"></a>undefinded和null</h2><pre><code>console.log(undefined == null) // trueconsole.log(undefined === null) // falseconsole.log(typeofnull) // objectconsole.log(typeofundefined) // undefined</code></pre><p>undefinded本质上是null的衍生类，说白了,undefinded就是未初始化，null就是不存在</p><h2 id="object-Object"><a href="#object-Object" class="headerlink" title="[object Object]"></a>[object Object]</h2><p>大家在console.log的时候肯定见到过[object Object]这种输出，那么这是什么呢?<br>先说一下产生原因把</p><pre><code>const res = {  name: &apos;Tony&apos;,  id: 123}console.log(`res${res}`) // res [object Object]// 相当于console.log(res.toString()) // res [object Object]</code></pre><p>形如这样的输出会造成这样的结果，其实类似于强制转化，因为前面已经有字符串了，再+一个变量就会输出这个变量的字符串形式，<br>也就是toString()，这个函数返回 “[object type]”，其中type是对象的类型，如果改成console.log(‘res’,res)就不会有问题</p><p>还有一种方式是利用JSON.stringify(res)转化</p><p>##利用方括号访问对象属性</p><p>访问一个对象的属性，除了可以用.的方式，还可以用方括号来访问，使用方括号的方式有一个好处就是可以访问变量,可避免一些保留字。形如:</p><pre><code>var obj = {&quot;name&quot;: &apos;henryye&apos;,    age: 20// 字段会自动打上双引号 &quot;age&quot;}var a = &quot;age&quot;console.log(obj[&quot;name&quot;]) // henryyeconsole.log(obj[a]) // 20</code></pre><h2 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h2><p>稍微深入了解js的朋友们肯定知道浏览器的垃圾回收机制，而防止因为未销毁的全局变量造成的内存泄漏的方法就是在函数尾部将该变量设为null，<br>但是这种做法很憨而且很麻烦。一般情况下，码农们并没有刻意去设置null或者是规范的代码的防止了内存泄露，而性能的影响也不是那么大（除非老板追求极致的性能或者你是强迫症患者）。像react这种组件化框架可以说有效的防止了内存泄漏，除非你在该组件卸载时又创建了变量。所以，平时代码写规范点就ok啦~</p><h2 id="事件队列"><a href="#事件队列" class="headerlink" title="事件队列"></a>事件队列</h2><pre><code>console.log(1)setTimeout(()=&gt;{console.log(8)}functionasync1() {console.log(2)}functionasync2() {await async1()console.log(3)}await async2()newPromise((resolve)=&gt;{console.log(4)    resolve()}).then(()=&gt;{console.log(6)    }).then(()=&gt;{console.log(7)    }  })console.log(5)</code></pre><p>输出顺序如代码所示，本质上是考对事件队列的宏任务和微任务的理解，推荐一篇<a href="https://juejin.im/post/5c3d8956e51d4511dc72c200/" target="_blank" rel="noopener">博文</a></p><h2 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h2><pre><code>for (var i = 0; i &lt; 5; i++) {    setTimeout(function() {console.log(i);    }, 1000);}// 5 5 5 5 5</code></pre><p>因为 setTimeout 的 console.log(i); 的i是 var 定义的，所以是函数级的作用域，不属于 for 循环体，属于 global。等到 for 循环结束，i 已经等于 5 了，这个时候再执行 setTimeout 的五个回调函数，里面的 console.log(i); 的 i 去向上找作用域，只能找到 global下 的 i，即 5。所以输出都是 5。</p><p>如果要输出12345，则需要改变函数的作用域</p><p>一：</p><pre><code>for (var i = 0; i &lt; 5; i++) {     (function(i){      //立刻执行函数        setTimeout(function (){console.log(i);           },1000);      })(i);  }</code></pre><p>二:</p><pre><code>for (let i = 0; i &lt; 5; i++) {     //let 代替 var    setTimeout(function (){console.log(i);       },1000);  }</code></pre><h2 id="变量提升"><a href="#变量提升" class="headerlink" title="变量提升"></a>变量提升</h2><pre><code>console.log(typeof t)var t = &apos;123&apos;for(var i = 0; i &lt; 3; i++) {console.log(i)}console.log(i)// undefinded 0 1 2 3</code></pre><p>这个是很经典也很简单的问题了，var定义的变量会提升至最顶部，前两句等于</p><pre><code>var tconsole.log(typeof t)t = &apos;123&apos;</code></pre><p>个人觉得这个设定很奇葩= =毕竟学过C和java这种强类型语言后看不惯这种随意的规则，幸好es6出的let和const完美替代var，把这段代码var换成let就会报错</p><h2 id="判断一个变量的类型"><a href="#判断一个变量的类型" class="headerlink" title="判断一个变量的类型"></a>判断一个变量的类型</h2><p>我们熟悉的判断类型的语句为 typeof，但是typeof可取的值却时常记不住，这里我来再提一遍，typeof可返回undefined,null,object,function,string,number六种字符串。如果要判断一个数组是不是数组的话，需要用 instanceof。instanceof 运算符用于检测构造函数的 prototype 属性是否出现在某个实例对象的原型链上。</p><h2 id="sort-方法"><a href="#sort-方法" class="headerlink" title="sort()方法"></a>sort()方法</h2><p>熟悉js的童鞋都知道sort()  方法用于对数组的元素进行排序(快排)，并返回数组，但是很少人钻研过它的细节，以至于大部分人都踩过坑。别急，首先来康康定义：默认排序顺序是根据字符串UniCode码。因为排序是按照字符串UniCode码的顺序进行排序的，所以首先应该把数组元素都转化成字符串（如有必要），以便进行比较。</p><p>语法：arrayObject.sort(sortby);</p><p>参数sortby  可选，用来规定排序的顺序，但必须是函数。</p><pre><code>// 普通用法var arr = [&apos;henry&apos;,&apos;ye&apos;,&apos;tonyma&apos;]arr.sort() // [&quot;henry&quot;, &quot;tonyma&quot;, &quot;ye&quot;]// 踩坑了var arr = [123,321,1000]arr.sort() // [1000, 123, 321]</code></pre><p>这时候就要给sort()提供一个函数参数了，这个函数的规则如下：<br>比较函数应该具有两个参数 a 和 b，其返回值如下：</p><p>若 a 小于 b，即 a - b 小于零，则返回一个小于零的值，数组将按照升序排列。</p><p>若 a 等于 b，则返回 0。</p><p>若 a 大于 b, 即 a - b 大于零，则返回一个大于零的值，数组将按照降序排列。<br>形如</p><pre><code>var arr = [123,321,1000]arr.sort((a,b)=&gt; {return a-b;}) // [123, 321, 1000]</code></pre><p>这个函数还可以通过ifelse返回不同的值形成更复杂的形式呢，万变不离其宗，记住a和b的关系和返回值与升降序的关联就好啦</p><h2 id="持续更新"><a href="#持续更新" class="headerlink" title="持续更新"></a>持续更新</h2>]]></content>
+      
+      
+      <categories>
+          
+          <category> javascript </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 面试题 </tag>
+            
+            <tag> javascript </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Hello,world！</title>
+      <link href="/2019/01/27/hello-world/"/>
+      <url>/2019/01/27/hello-world/</url>
+      
+        <content type="html"><![CDATA[<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+  
+  
+</search>

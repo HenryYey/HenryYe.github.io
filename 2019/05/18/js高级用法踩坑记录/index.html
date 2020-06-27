@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.henryye.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本水文持续收集我在工作和学习中遇到的值得记录的笔记，讲解一些需要时间去理解、去记忆的js高级用法，加深自己的记忆 异步转同步函数这里最经典的一个场景就是 后端还没获得操作数据库的结果就返回一个空值给前端了，很多同学刚学前后端交互时，包括我，都会头疼好久。那么，这里我介绍两种方法。 async &amp; await详解见这里 我通俗易懂的讲下，有些组件框架封装好的高级函数或api，例如Sequel">
+<meta property="og:type" content="article">
+<meta property="og:title" content="js高级用法踩坑记录">
+<meta property="og:url" content="https://blog.henryye.top/2019/05/18/js%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="有梦想的咸鱼">
+<meta property="og:description" content="本水文持续收集我在工作和学习中遇到的值得记录的笔记，讲解一些需要时间去理解、去记忆的js高级用法，加深自己的记忆 异步转同步函数这里最经典的一个场景就是 后端还没获得操作数据库的结果就返回一个空值给前端了，很多同学刚学前后端交互时，包括我，都会头疼好久。那么，这里我介绍两种方法。 async &amp; await详解见这里 我通俗易懂的讲下，有些组件框架封装好的高级函数或api，例如Sequel">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-05-18T04:15:20.000Z">
+<meta property="article:modified_time" content="2020-06-27T08:41:55.144Z">
+<meta property="article:author" content="HenryYe">
+<meta property="article:tag" content="面试题">
+<meta property="article:tag" content="javascript">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.henryye.top/2019/05/18/js%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>js高级用法踩坑记录 | 有梦想的咸鱼</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">有梦想的咸鱼</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">HenryYe's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.henryye.top/2019/05/18/js%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="HenryYe">
+      <meta itemprop="description" content="21届前端仔记录偷偷学习的点滴 技术blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="有梦想的咸鱼">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          js高级用法踩坑记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-05-18 12:15:20" itemprop="dateCreated datePublished" datetime="2019-05-18T12:15:20+08:00">2019-05-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-27 16:41:55" itemprop="dateModified" datetime="2020-06-27T16:41:55+08:00">2020-06-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/" itemprop="url" rel="index"><span itemprop="name">javascript</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本水文持续收集我在工作和学习中遇到的值得记录的笔记，讲解一些需要时间去理解、去记忆的js高级用法，加深自己的记忆</p>
+<h2 id="异步转同步函数"><a href="#异步转同步函数" class="headerlink" title="异步转同步函数"></a>异步转同步函数</h2><p>这里最经典的一个场景就是 后端还没获得操作数据库的结果就返回一个空值给前端了，很多同学刚学前后端交互时，包括我，都会头疼好久。那么，这里我介绍两种方法。</p>
+<h3 id="async-amp-await"><a href="#async-amp-await" class="headerlink" title="async &amp; await"></a>async &amp; await</h3><p>详解见<a href="http://es6.ruanyifeng.com/#docs/async" target="_blank" rel="noopener">这里</a></p>
+<p>我通俗易懂的讲下，有些组件框架封装好的高级函数或api，例如Sequelize，会“标识”一些异步函数，在调用时在前面加一个 await，就可以将这行变成一个同步过程，在含await的函数外层加一个async就可以了。</p>
+<pre><code>const Func = asyncfunction(userName, password) {
+const result = await db.findAll({
+    where: {
+      userName,
+      password
+    }
+  });
+return result;
+}</code></pre><p>理解和用法都很简单，也是常用的，但是不是每个函数都可以用，一些比较原始的例如node的mysql模块，它对数据库的操作就不能被await作用，所以这时候我们就要用下面这个通用方法了。</p>
+<h3 id="Promise"><a href="#Promise" class="headerlink" title="Promise"></a>Promise</h3><p><a href="http://es6.ruanyifeng.com/#docs/promise" target="_blank" rel="noopener">Promise</a>理解起来比较困难，但其实基本用法很简单，以下就是一个通用的函数模板</p>
+<pre><code>const Func = asyncfunction() =&gt; {
+returnnewPromise((resolve, reject) =&gt; {
+const SQL = &quot;SELECT * FROM table&quot;;
+    connection.query(SQL, function (err, result) {
+if (err) {
+        reject(newError(&apos;[ERROR] - &apos; + err.message));
+      }
+      resolve(result);
+    });
+  }).then(result =&gt; {
+return result;
+  }).catch(err =&gt; {
+throw err;
+  })</code></pre><p>大致就是在函数外层封装一个Promise，当异步操作结束后就可以通过then()和catch()拿到结果了。需要深入理解一下。所有async await解决不了的就用Promise吧~</p>
+<h2 id="JSON与String互转"><a href="#JSON与String互转" class="headerlink" title="JSON与String互转"></a>JSON与String互转</h2><p>Json -&gt; string: JSON.stringify(json);</p>
+<p>string -&gt; Json: JSON.parse(string);</p>
+<p>这里主要想提醒大家的是，如果拿到一个JSON转为字符串，再转回来发现失败了，大概率是因为这个值本身包含了 双引号”或者一些奇奇怪怪的转义符，具体原因大家可以研究一下，我提供几个解决方法:<br>1、利用eval()函数，它可计算某个字符串，并执行其中的js代码</p>
+<pre><code>JSON.parse(eval(string));</code></pre><p>2、研究其规律，手动删除</p>
+<pre><code>content = content.replace(/[\\]/g,&apos;&apos;); // 删除反斜杠
+content = content.substring(1,content.length - 1); // 删除第一个和最后一个字符</code></pre>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="tag"># 面试题</a>
+              <a href="/tags/javascript/" rel="tag"># javascript</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/04/11/%E6%B5%85%E8%B0%88react%E4%B8%ADsetState%E7%9A%84%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E6%9C%BA%E5%88%B6/" rel="prev" title="浅谈react中setState的同步和异步机制">
+      <i class="fa fa-chevron-left"></i> 浅谈react中setState的同步和异步机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/08/25/koa-template-%E4%BB%8E0%E5%BC%80%E5%A7%8B%E6%90%AD%E5%BB%BAkoa%E9%A1%B9%E7%9B%AE%E6%A8%A1%E6%9D%BF/" rel="next" title="[koa-template]从0开始搭建koa项目模板">
+      [koa-template]从0开始搭建koa项目模板 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#异步转同步函数"><span class="nav-number">1.</span> <span class="nav-text">异步转同步函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#async-amp-await"><span class="nav-number">1.1.</span> <span class="nav-text">async &amp; await</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Promise"><span class="nav-number">1.2.</span> <span class="nav-text">Promise</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON与String互转"><span class="nav-number">2.</span> <span class="nav-text">JSON与String互转</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">HenryYe</p>
+  <div class="site-description" itemprop="description">21届前端仔记录偷偷学习的点滴 技术blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/HenryYey" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;HenryYey" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:103596420@qq.com" title="E-Mail → mailto:103596420@qq.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HenryYe</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
