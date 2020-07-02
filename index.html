@@ -178,7 +178,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/06/28/ES6-ES11%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E7%94%A8%E9%AA%9A%E6%93%8D%E4%BD%9C/" class="post-title-link" itemprop="url">ES6-ES10核心特性和实用骚操作</a>
+            <a href="/2020/06/28/ES6-ES11%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E7%94%A8%E9%AA%9A%E6%93%8D%E4%BD%9C/" class="post-title-link" itemprop="url">ES6-ES11核心特性和实用骚操作</a>
         </h2>
 
         <div class="post-meta">
@@ -189,16 +189,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-06-28 16:29:24 / 修改时间：16:31:39" itemprop="dateCreated datePublished" datetime="2020-06-28T16:29:24+08:00">2020-06-28</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/javascript/" itemprop="url" rel="index"><span itemprop="name">javascript</span></a>
-                </span>
+              <time title="创建时间：2020-06-28 16:29:24 / 修改时间：17:03:58" itemprop="dateCreated datePublished" datetime="2020-06-28T16:29:24+08:00">2020-06-28</time>
             </span>
 
           
@@ -243,7 +234,15 @@
 <p>es2020的Promise.allSettled就是解决这样的问题，无论什么状态都会进入then，然后我们在并发任务的 then 里面通过 filter来过滤出想要的业务逻辑结果，这就能最大限度的保障业务当前状态的可访问性，不至于某个接口挂了导致在整个页面挂了。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Promise.allSettled([</span><br><span class="line">    Promise.reject(&#123;code: 500, msg: &#39;服务异常&#39;&#125;),</span><br><span class="line">    Promise.resolve(&#123; code: 200, list: []&#125;),</span><br><span class="line">    Promise.resolve(&#123;code: 200, list: []&#125;)</span><br><span class="line">])</span><br><span class="line">.then((ret) &#x3D;&gt; &#123;</span><br><span class="line">    const result &#x3D; ret.filter((item) &#x3D;&gt; &#123;</span><br><span class="line">        return el.status !&#x3D;&#x3D; &#39;rejected&#39;;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
+<h3 id="dynamic-import"><a href="#dynamic-import" class="headerlink" title="dynamic-import"></a>dynamic-import</h3><p>以往，我们要在头部全量导入资源。<br>现在可以动态导入资源并且回调了, 按需加载使用，nice！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">import(&#96;&#x2F;path&#x2F;source.js&#96;)</span><br><span class="line">  .then((module) &#x3D;&gt; &#123;</span><br><span class="line">      module.doSomthing();</span><br><span class="line">  &#125;).catch((err) &#x3D;&gt; &#123;</span><br><span class="line">      &#x2F;&#x2F; load error;</span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure>
 
+<h3 id="globalThis"><a href="#globalThis" class="headerlink" title="globalThis"></a>globalThis</h3><p>js 在不同的环境获取全局对象有不同方式，node 中通过 global, web中通过 window, self 等，有些甚至通过 this 获取。所以，过去获取全局对象，需要这样:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">var getGlobal &#x3D; function () &#123; </span><br><span class="line">  if (typeof self !&#x3D;&#x3D; &#39;undefined&#39;) &#123; return self; &#125; </span><br><span class="line">  if (typeof window !&#x3D;&#x3D; &#39;undefined&#39;) &#123; return window; &#125; </span><br><span class="line">  if (typeof global !&#x3D;&#x3D; &#39;undefined&#39;) &#123; return global; &#125; </span><br><span class="line">  throw new Error(&#39;unable to locate global object&#39;); </span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line">var globals &#x3D; getGlobal();</span><br></pre></td></tr></table></figure>
+
+<p>es2020后，我们可以通过globalThis直接获取全局对象，方便快捷且规范</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">globalThis.setTimeout ? </span><br><span class="line">    setTimeout(foo, <span class="number">100</span>) :</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"此环境没有setTimeout"</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="ES2019"><a href="#ES2019" class="headerlink" title="ES2019"></a>ES2019</h2>
       
     </div>
 
