@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.henryye.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言最近学了一波Deno, 由于新东西 社区不完善，学的过程中都是翻英文文档和源码慢慢摸索，所以这里总结一些核心要点，帮助读者快速上手入门Deno，详细学习见官方手册 Deno是什么？deno是一个默认安全运行环境的JS&#x2F;Ts&#x2F;WebAssembly runtime，是Node.js之父 Ryan Dahl开发的新项目,号称是node的替代品，于2020年5月13日正式发布。他的名字由node的字">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Deno初体验及实战入门">
+<meta property="og:url" content="https://blog.henryye.top/2020/07/11/Deno%E5%88%9D%E4%BD%93%E9%AA%8C%E5%8F%8A%E5%AE%9E%E6%88%98%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="有梦想的咸鱼">
+<meta property="og:description" content="前言最近学了一波Deno, 由于新东西 社区不完善，学的过程中都是翻英文文档和源码慢慢摸索，所以这里总结一些核心要点，帮助读者快速上手入门Deno，详细学习见官方手册 Deno是什么？deno是一个默认安全运行环境的JS&#x2F;Ts&#x2F;WebAssembly runtime，是Node.js之父 Ryan Dahl开发的新项目,号称是node的替代品，于2020年5月13日正式发布。他的名字由node的字">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-11T08:47:46.000Z">
+<meta property="article:modified_time" content="2020-07-11T11:56:25.188Z">
+<meta property="article:author" content="HenryYe">
+<meta property="article:tag" content="javascript">
+<meta property="article:tag" content="typescript">
+<meta property="article:tag" content="deno">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://blog.henryye.top/2020/07/11/Deno%E5%88%9D%E4%BD%93%E9%AA%8C%E5%8F%8A%E5%AE%9E%E6%88%98%E5%85%A5%E9%97%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Deno初体验及实战入门 | 有梦想的咸鱼</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">有梦想的咸鱼</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">HenryYe's blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.henryye.top/2020/07/11/Deno%E5%88%9D%E4%BD%93%E9%AA%8C%E5%8F%8A%E5%AE%9E%E6%88%98%E5%85%A5%E9%97%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="HenryYe">
+      <meta itemprop="description" content="21届前端仔记录偷偷学习的点滴 技术blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="有梦想的咸鱼">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Deno初体验及实战入门
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-07-11 16:47:46 / 修改时间：19:56:25" itemprop="dateCreated datePublished" datetime="2020-07-11T16:47:46+08:00">2020-07-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/" itemprop="url" rel="index"><span itemprop="name">javascript</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/typescript/" itemprop="url" rel="index"><span itemprop="name">typescript</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/javascript/typescript/deno/" itemprop="url" rel="index"><span itemprop="name">deno</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近学了一波Deno, 由于新东西 社区不完善，学的过程中都是翻英文文档和源码慢慢摸索，所以这里总结一些核心要点，帮助读者快速上手入门Deno，详细学习见官方手册</p>
+<h1 id="Deno是什么？"><a href="#Deno是什么？" class="headerlink" title="Deno是什么？"></a>Deno是什么？</h1><p>deno是一个默认安全运行环境的JS/Ts/WebAssembly runtime，是Node.js之父 <code>Ryan Dahl</code>开发的新项目,号称是node的替代品，于2020年5月13日正式发布。他的名字由node的字母重新拼接，意为 destory-node。</p>
+<p>在node主宰前端的时代，作者为什么还要研发deno呢？因为，作者认为，node目前的发展已经违背了他的初衷，有许多无法解决的痛点，所以，他决定重新打造一个”升级版node”</p>
+<h1 id="Node痛点"><a href="#Node痛点" class="headerlink" title="Node痛点"></a>Node痛点</h1><p>node最难以忍受的几个痛点如下</p>
+<ul>
+<li>不安全、臃肿且难以管理的node_modules</li>
+<li>CommonJs与ES模块不兼容</li>
+<li>本身功能不完整，需要外部工具来兼容typescript、babel、webpack…</li>
+</ul>
+<h1 id="Deno新特性"><a href="#Deno新特性" class="headerlink" title="Deno新特性"></a>Deno新特性</h1><p>其实对于我们开发者来说，Deno的大部分特性还是和Node一样。但是，也有一些新特性，下面是最核心的几个点:</p>
+<ul>
+<li>底层语言不同，node使用C++, 而deno使用Rust</li>
+<li>原生支持typescript,全局window,webAPI，fetch,异步返回promise等</li>
+<li>deno使用ESmodule，即不再使用npm安装包，并且没有package.json集中管理，而是直接通过URL加载</li>
+<li>默认安全，需要授权才能读写文件、访问网络。</li>
+</ul>
+<h1 id="Start"><a href="#Start" class="headerlink" title="Start"></a>Start</h1><h2 id="安装及环境配置"><a href="#安装及环境配置" class="headerlink" title="安装及环境配置"></a>安装及环境配置</h2><p>deno的安装十分简单(连windows都是一键)</p>
+<p>macOS 和 Linux 系统上使用 shell:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https:&#x2F;&#x2F;deno.land&#x2F;x&#x2F;install&#x2F;install.sh | sh</span><br></pre></td></tr></table></figure>
+<p>Win系统上使用 PowerShell:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iwr https:&#x2F;&#x2F;deno.land&#x2F;x&#x2F;install&#x2F;install.ps1 -useb | iex</span><br></pre></td></tr></table></figure>
+
+<p>环境变量是安装后默认配好的。可以输入 <code>deno --version</code>来验证一下</p>
+<p>接下来，我们在ide上装一下扩展插件就好了。<br>对于<code>VS Code</code>,安装<code>vscode_deno</code></p>
+<h2 id="hello-world"><a href="#hello-world" class="headerlink" title="hello world"></a>hello world</h2><p>命令行输入时，支持多参数、本地/网络url。具体见 deno –help</p>
+<p>首先我们建一个 hello.ts文件，然后写入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">console.log(&quot;hello,world&quot;);</span><br></pre></td></tr></table></figure>
+<p>在命令行输入 <code>deno run ./hello.ts</code>，可以看到控制台输出 hello,world 。即我们成功用deno运行了一个ts文件</p>
+<h2 id="包管理"><a href="#包管理" class="headerlink" title="包管理"></a>包管理</h2><p>包管理是deno的最大特点，我们可以直接通过本地/网络url来导入包，并且会在本地进行一个缓存。</p>
+<p>例如:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Application &#125; <span class="keyword">from</span> <span class="string">"https://deno.land/x/oak/mod.ts"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; serve &#125; <span class="keyword">from</span> <span class="string">"https://deno.land/std@v0.30.0/http/server.ts"</span>; <span class="comment">// 指定版本</span></span><br></pre></td></tr></table></figure>
+<p>其实本质上还是一个upload资源-&gt;使用的过程，但是它没有node_modules+package.json，而是直接引入。这种方式个人认为有好有坏，虽然集中包管理会使各种包冗余，体积庞大，但是对于开发者来讲，能方便的阅读、编码和进行版本管理，并且不用担心网络依赖被墙、被黑等。。但是既然做了，肯定是作者认为这种方式更好，所以我们就期待真香把！</p>
+<p>建议，创建一个文件来集中管理deps</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// deps.ts</span></span><br><span class="line"><span class="keyword">export</span> * <span class="keyword">from</span> <span class="string">"https://deno.land/std@v0.57.0/testing/asserts.ts"</span>;</span><br><span class="line"><span class="keyword">export</span> * <span class="keyword">from</span> <span class="string">"https://deno.land/x/oak/mod.ts"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// hello.ts 使用</span></span><br><span class="line"><span class="keyword">import</span> &#123; Application, Router &#125; <span class="keyword">from</span> <span class="string">"../deps.ts"</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="安全权限"><a href="#安全权限" class="headerlink" title="安全权限"></a>安全权限</h2><p>deno的核心特性是需要授权才可以进行读写操作、网络通信。</p>
+<p>在官网给的例子中，有这样一个读文件的程序:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> filenames = Deno.args;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> filename of filenames) &#123;</span><br><span class="line">  <span class="keyword">const</span> file = <span class="keyword">await</span> Deno.open(filename);</span><br><span class="line">  <span class="keyword">await</span> Deno.copy(file, Deno.stdout);</span><br><span class="line">  file.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们运行一下, 会发现报了个错，即无权限:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deno run https:&#x2F;&#x2F;deno.land&#x2F;std&#x2F;examples&#x2F;cat.ts .&#x2F;fuck.ts</span><br></pre></td></tr></table></figure>
+<p>此时，我们启动时赋予读权限，即可正常完成输出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deno run --allow-read https:&#x2F;&#x2F;deno.land&#x2F;std&#x2F;examples&#x2F;cat.ts .&#x2F;fuck.ts</span><br></pre></td></tr></table></figure>
+<p>可授权参数如下:</p>
+<p><code>-A, --allow-all</code> 赋予所有权限</p>
+<p><code>--allow-env</code> 允许读写环境变量</p>
+<p><code>--allow-net=\&lt;allow-net&gt;</code> 允许对指定域名网络通信</p>
+<p><code>--allow-plugin</code> 允许加载插件</p>
+<p><code>--allow-read=\&lt;allow-read&gt;</code> 授权指定文件读权限</p>
+<p><code>--allow-write=\&lt;allow-write&gt;</code> 写权限</p>
+<p><code>--allow-run</code> 允许运行子进程。 请注意，子流程未在沙箱中运行，因此没有与deno流程相同的安全限制。 </p>
+<p><code>--allow-hrtime</code> (不了解，直接贴原文吧) Allow high resolution time measurement. High resolution time can be used in timing attacks and fingerprinting.</p>
+<h2 id="Http-server"><a href="#Http-server" class="headerlink" title="Http server"></a>Http server</h2><p>与node相似，我们可以很简易的就搭建一个服务器</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; serve &#125; <span class="keyword">from</span> <span class="string">"https://deno.land/std@v0.50.0/http/server.ts"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> PORT = <span class="number">8080</span>;</span><br><span class="line"><span class="keyword">const</span> s = serve(&#123; port: PORT &#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">` Listening on http://localhost:<span class="subst">$&#123;PORT&#125;</span>/`</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="keyword">await</span> (<span class="keyword">const</span> req of s) &#123;</span><br><span class="line">  req.respond(&#123; body: <span class="string">"fuck\n"</span> &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行并赋予网络权限: <code>deno run --allow-net ./server.ts</code>,此时我们在浏览器输入<code>http://localhost:8080</code>,即可看到一个fuck。。</p>
+<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><p>以上是最简单最基础的一个流程，接下来，我们可以研究一下如何在实战项目中使用</p>
+<h2 id="框架–oak"><a href="#框架–oak" class="headerlink" title="框架–oak"></a>框架–oak</h2><p>node有koa，对应的deno有oak，用法和特点都十分相似，都是洋葱圈式的中间件框架，甚至连名字都差不多。。目前也是stars最多的一个项目</p>
+<p>下面是一个五脏俱全的用例</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Application, Router &#125; <span class="keyword">from</span> <span class="string">"https://deno.land/std@v0.57.0/testing/asserts.ts"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Application();</span><br><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> Router();</span><br><span class="line"><span class="keyword">const</span> port: <span class="built_in">number</span> = <span class="number">8080</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Logger</span></span><br><span class="line">app.use(<span class="keyword">async</span> (ctx: <span class="built_in">any</span>, next: <span class="built_in">any</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">await</span> next();</span><br><span class="line">  <span class="keyword">const</span> rt = ctx.response.headers.get(<span class="string">"X-Response-Time"</span>);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;ctx.request.method&#125;</span> <span class="subst">$&#123;ctx.request.url&#125;</span> - <span class="subst">$&#123;rt&#125;</span>`</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Timing</span></span><br><span class="line">app.use(<span class="keyword">async</span> (ctx: <span class="built_in">any</span>, next: <span class="built_in">any</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> start = <span class="built_in">Date</span>.now();</span><br><span class="line">  <span class="keyword">await</span> next();</span><br><span class="line">  <span class="keyword">const</span> ms = <span class="built_in">Date</span>.now() - start;</span><br><span class="line">  ctx.response.headers.set(<span class="string">"X-Response-Time"</span>, <span class="string">`<span class="subst">$&#123;ms&#125;</span>ms`</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">router.get(<span class="string">"/"</span>, <span class="function">(<span class="params">&#123; response &#125;: &#123; response: <span class="built_in">any</span> &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">  response.body = &#123;</span><br><span class="line">    message: <span class="string">"hello world"</span>,</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;);</span><br><span class="line">app.use(router.routes());</span><br><span class="line">app.use(router.allowedMethods());</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'running on port '</span>, port);</span><br><span class="line"><span class="keyword">await</span> app.listen(&#123; port &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>Deno支持V8 Inspector Protocol，即我们可以使用Chrome Devtools或VsCode来对程序进行调试，由于许多工具插件仍在开发中，所以这里我们手动配置一下<code>lanuch.json</code>在VsCode中进行调试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;version&quot;: &quot;0.2.0&quot;,</span><br><span class="line">  &quot;configurations&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;name&quot;: &quot;Deno&quot;,</span><br><span class="line">      &quot;type&quot;: &quot;node&quot;,</span><br><span class="line">      &quot;request&quot;: &quot;launch&quot;,</span><br><span class="line">      &quot;cwd&quot;: &quot;$&#123;workspaceFolder&#125;&quot;,</span><br><span class="line">      &quot;runtimeExecutable&quot;: &quot;deno&quot;,</span><br><span class="line">      &quot;runtimeArgs&quot;: [&quot;run&quot;, &quot;--inspect-brk&quot;, &quot;-A&quot;, &quot;fuck.ts&quot;],</span><br><span class="line">      &quot;port&quot;: 8080</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>详细学习并且入门实践后，体验还行。好感是原生支持ts和一些需要配置的东西，更安全了，并且没有了node_modules，轻了好多。负面的也有，就是目前生态和社区不完善，只能做做玩具，一些隐藏的风险也没有发现，网络依赖也有可能会被墙</p>
+<p>个人认为，当deno持续发展，加上持续集成、单元测试，项目迭代等等一整套真正工程化以后，怕是最后还是需要npm或另一种管理包工具。如果只是做一点玩具，用不用区别不大，但是Deno的核心思想，解决冗余的包管理/保证运行安全 是值得我们学习的(发现轮子不行就造更好的轮子。。)</p>
+<p>期待并看好Deno的未来，毕竟Node的这十年，逐步发展，引领前端行业到了一个新高度，不再是切图仔。Deno最终能否替代Node需要时间来证明。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/javascript/" rel="tag"># javascript</a>
+              <a href="/tags/typescript/" rel="tag"># typescript</a>
+              <a href="/tags/deno/" rel="tag"># deno</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/27/ES11%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E7%94%A8%E9%AA%9A%E6%93%8D%E4%BD%9C/" rel="prev" title="ES2020新特性和实用技巧">
+      <i class="fa fa-chevron-left"></i> ES2020新特性和实用技巧
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deno是什么？"><span class="nav-number">2.</span> <span class="nav-text">Deno是什么？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Node痛点"><span class="nav-number">3.</span> <span class="nav-text">Node痛点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deno新特性"><span class="nav-number">4.</span> <span class="nav-text">Deno新特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Start"><span class="nav-number">5.</span> <span class="nav-text">Start</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装及环境配置"><span class="nav-number">5.1.</span> <span class="nav-text">安装及环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hello-world"><span class="nav-number">5.2.</span> <span class="nav-text">hello world</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#包管理"><span class="nav-number">5.3.</span> <span class="nav-text">包管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全权限"><span class="nav-number">5.4.</span> <span class="nav-text">安全权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Http-server"><span class="nav-number">5.5.</span> <span class="nav-text">Http server</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实战"><span class="nav-number">6.</span> <span class="nav-text">实战</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#框架–oak"><span class="nav-number">6.1.</span> <span class="nav-text">框架–oak</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调试"><span class="nav-number">6.2.</span> <span class="nav-text">调试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">HenryYe</p>
+  <div class="site-description" itemprop="description">21届前端仔记录偷偷学习的点滴 技术blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/HenryYey" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;HenryYey" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:103596420@qq.com" title="E-Mail → mailto:103596420@qq.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">HenryYe</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
